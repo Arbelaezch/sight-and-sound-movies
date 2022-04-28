@@ -1,0 +1,13 @@
+body {
+	background-color: rgb(160, 188, 194);
+	color: rgb(254, 251, 231);
+}
+
+h1 {
+	padding: 3% 15% 0 15%;
+	color: rgb(249, 235, 200);
+}
+
+.list {
+	padding: 3% 13%;
+}

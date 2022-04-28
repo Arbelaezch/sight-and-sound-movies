@@ -15,7 +15,9 @@
 	<div class="list">
 		<ol>
 	{% for movie in movie_list: %}
-		<li>{{movie}}</li>
+	<div class="item">
+		<li><a href={{ movie['movie_url'] }}>{{movie["title"]}}</a></li>
+	</div>
 	{% endfor %}
 		</ol>
 	</div>

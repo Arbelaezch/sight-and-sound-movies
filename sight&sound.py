@@ -41,70 +41,111 @@ MOVIE_ENDPOINT = 'https://api.themoviedb.org/3/movie/'
 r = requests.get(url=URL)
 soup = BeautifulSoup(r.text, 'html.parser')
 
+
+
+
+####### TESTING #################
 # title = soup.find("h2", {"class": 'Headline__H2-sc-uipteu-2'})
 
 # # Uses The Movie Database to get each film's details
 # response = requests.get(f"{SEARCH_API_ENDPOINT}?api_key={API_KEY}&query={title.a.text}").json()['results'][0]
+
 # movie_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}?api_key={API_KEY}").json()
+# # print(movie_r["production_countries"][0]['iso_3166_1'])
+
 # crew_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}/credits?api_key={API_KEY}").json()
 
 # director = crew_r["crew"]
 # director = next((item for item in director if item['job'] == 'Director'), None)
 
+# # print(movie_r['overview'])
 
-# print(director['name'])
+# amount = movie_r["budget"]
+# currency = "${:,.0f}".format(amount)
 
-#################################
-# print(title.a.get('href'))
+# movie_dict = {
+# 				"title": title.a.text,
+# 				"director": director['name'],
+# 				"country": movie_r['production_countries'][0]['iso_3166_1'],
+# 				"year": movie_r['release_date'][0:4],
+# 				"synopsis": movie_r['overview'],
+# 				"img_url": f"https://image.tmdb.org/t/p/original/{movie_r['poster_path']}",
+# 				"movie_url": title.a.get('href'),
+# 				"tagline": movie_r['tagline'],
+# 				"runtime": f"{movie_r['runtime']}mins",
+# 				"budget": currency
+# 			}
+
+# print(movie_dict)
 
 
 
+
+
+
+
+####### PROGRAM ##########################
+
+movie_db = "movie_db.json"
+
+# Renders movie_db data in index.html
 @app.route("/")
 def home():
+	movie_list = []
+	with open(movie_db, "r") as file:
+		data = json.load(file)
+  
+	for movie in data:
+		movie_list.append(movie["title"]) 
     
-    
-	return render_template("index.html", movie_list=movie_list)
+	return render_template("index.html", movie_list=data)
 
 
+# Retreives all the movies and movie data and stores it in movie_db.json
 @app.route("/get")
 def get():
 	movie_list = []
-	# Finds the title of each movie from the Sight & Sound webpage  
+	
+ 	# Finds the title of each movie from the Sight & Sound webpage  
 	h2_titles = soup.find_all("h2", {"class": 'Headline__H2-sc-uipteu-2'})
 
 	for title in h2_titles:
 		try:
+			# Retrieves the data for the movie by getting it's title and ID for The Movie Database API
 			response = requests.get(f"{SEARCH_API_ENDPOINT}?api_key={API_KEY}&query={title.a.text}").json()['results'][0]
 			movie_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}?api_key={API_KEY}").json()
 			crew_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}/credits?api_key={API_KEY}").json()
    
 			director = crew_r["crew"]
 			director = next((item for item in director if item['job'] == 'Director'), None)
-			# print(director['name'])
+
+			amount = movie_r["budget"]
+			currency = "${:,.0f}".format(amount)
    
+			# Retreived data stored in dictionary and appended to list of dictionaries.
 			movie_dict = {
-				"title": title,
+				"title": title.a.text,
 				"director": director['name'],
-				"country": movie_r['production_countries']['iso_3166_1'],
+				"country": movie_r['production_countries'][0]['iso_3166_1'],
 				"year": movie_r['release_date'][0:4],
-				"synopsis": movie_r['Overview'],
+				"synopsis": movie_r['overview'],
 				"img_url": f"https://image.tmdb.org/t/p/original/{movie_r['poster_path']}",
 				"movie_url": title.a.get('href'),
 				"tagline": movie_r['tagline'],
-				"runtime": movie_r["runtime"],
-				"budget": movie_r["budget"]
+				"runtime": f"{movie_r['runtime']}mins",
+				"budget": currency
 			}
-   
+			
 			movie_list.append(movie_dict)
-
-
-			# For if I want to use an SQL db instead of JSON.
-			# movie = Movie(id=response["id"], title=title, director=movie_r[''], country=movie_r[''], year=movie_r['release_date'][0:4], synopsis=movie_r[''], img_url=movie_r[''], movie_url=title.a.get('href'), tagline=movie_r[''], runtime=movie_r[''], budget=movie_r[''])
    
 		except:
 			pass
+
+	# Completed list of movie dictionaries written to movie_db.json
+	with open(movie_db, "w") as file:
+		json.dump(movie_list, file, indent=4, separators=(',', ': '))
     
-	return redirect("index.html")
+	return redirect('/')
 
 
 

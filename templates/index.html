@@ -16,7 +16,34 @@
 		<ol>
 	{% for movie in movie_list: %}
 	<div class="item">
-		<li><a href={{ movie['movie_url'] }}>{{movie["title"]}}</a></li>
+		<li class="movie">
+			<img src={{ movie['img_url'] }} alt="poster">
+			<div class="info">
+				<div class="movie_header">
+					<h2>{{movie['num']}}. <a href={{ movie['movie_url'] }}>{{ movie["title"] }} ({{ movie["year"] }})</a></h2>
+					<h4>{{movie["runtime"]}}</h4>
+				</div>
+				
+				<p>{{movie["director"]}}, 
+					{% if movie["country"] == "United States of America": %}
+					US
+					{% else: %}
+					{{ movie['country']}}</p>
+					{% endif%}
+				<p>{{movie["synopsis"]}}</p>
+				{% if movie["budget"] != 0: %}
+				<p>Budget: {{movie["budget"]}}</p>
+				{% endif%}
+				{% if movie["tagline"][0] != '"' and movie["tagline"]: %}
+				<p>"{{ movie['tagline']}}"</p>
+				{% else: %}
+				<p>{{ movie['tagline']}}</p>
+				{% endif%}
+
+
+			</div>
+
+		</li>
 	</div>
 	{% endfor %}
 		</ol>

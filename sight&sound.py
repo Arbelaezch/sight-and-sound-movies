@@ -1,3 +1,4 @@
+from ast import Num
 from bs4 import BeautifulSoup
 import requests
 from flask import Flask, redirect, render_template
@@ -47,6 +48,14 @@ soup = BeautifulSoup(r.text, 'html.parser')
 ####### TESTING #################
 # title = soup.find("h2", {"class": 'Headline__H2-sc-uipteu-2'})
 
+
+# r = requests.get(url=title.a.get('href'))
+# soup = BeautifulSoup(r.text, 'html.parser')
+# year = int(soup.find("span", {"class": 'full-title-work-year'}).text[1:5])
+
+# print(title.a.text)
+
+
 # # Uses The Movie Database to get each film's details
 # response = requests.get(f"{SEARCH_API_ENDPOINT}?api_key={API_KEY}&query={title.a.text}").json()['results'][0]
 
@@ -61,19 +70,19 @@ soup = BeautifulSoup(r.text, 'html.parser')
 # # print(movie_r['overview'])
 
 # amount = movie_r["budget"]
-# currency = "${:,.0f}".format(amount)
+# currency = "{:,.0f}".format(amount)
 
 # movie_dict = {
 # 				"title": title.a.text,
 # 				"director": director['name'],
-# 				"country": movie_r['production_countries'][0]['iso_3166_1'],
+# 				"country": movie_r['production_countries'][0]['name'],
 # 				"year": movie_r['release_date'][0:4],
 # 				"synopsis": movie_r['overview'],
 # 				"img_url": f"https://image.tmdb.org/t/p/original/{movie_r['poster_path']}",
 # 				"movie_url": title.a.get('href'),
 # 				"tagline": movie_r['tagline'],
 # 				"runtime": f"{movie_r['runtime']}mins",
-# 				"budget": currency
+# 				"budget": int(currency)
 # 			}
 
 # print(movie_dict)
@@ -105,14 +114,20 @@ def home():
 @app.route("/get")
 def get():
 	movie_list = []
+	num = 1
 	
  	# Finds the title of each movie from the Sight & Sound webpage  
 	h2_titles = soup.find_all("h2", {"class": 'Headline__H2-sc-uipteu-2'})
 
 	for title in h2_titles:
 		try:
+			r = requests.get(url=title.a.get('href'))
+			soup2 = BeautifulSoup(r.text, 'html.parser')
+			year = int(soup2.find("span", {"class": 'full-title-work-year'}).text[1:5])
+
+
 			# Retrieves the data for the movie by getting it's title and ID for The Movie Database API
-			response = requests.get(f"{SEARCH_API_ENDPOINT}?api_key={API_KEY}&query={title.a.text}").json()['results'][0]
+			response = requests.get(f"{SEARCH_API_ENDPOINT}?api_key={API_KEY}&query={title.a.text}&year={year}").json()['results'][0]
 			movie_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}?api_key={API_KEY}").json()
 			crew_r = requests.get(f"{MOVIE_ENDPOINT}{response['id']}/credits?api_key={API_KEY}").json()
    
@@ -120,14 +135,21 @@ def get():
 			director = next((item for item in director if item['job'] == 'Director'), None)
 
 			amount = movie_r["budget"]
-			currency = "${:,.0f}".format(amount)
+			if int(amount) != 0:
+				currency = "${:,.0f}".format(amount)
+			else:
+				currency = 0
+   
+			
+   
    
 			# Retreived data stored in dictionary and appended to list of dictionaries.
 			movie_dict = {
+				"num": num,
 				"title": title.a.text,
 				"director": director['name'],
-				"country": movie_r['production_countries'][0]['iso_3166_1'],
-				"year": movie_r['release_date'][0:4],
+				"country": movie_r['production_countries'][0]['name'],
+				"year": str(year),
 				"synopsis": movie_r['overview'],
 				"img_url": f"https://image.tmdb.org/t/p/original/{movie_r['poster_path']}",
 				"movie_url": title.a.get('href'),
@@ -135,8 +157,9 @@ def get():
 				"runtime": f"{movie_r['runtime']}mins",
 				"budget": currency
 			}
-			
+			print(movie_dict["title"])
 			movie_list.append(movie_dict)
+			num += 1
    
 		except:
 			pass

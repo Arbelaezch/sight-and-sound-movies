@@ -13,18 +13,46 @@ body {
 }
 
 h1 {
-	padding: 3% 15% 0 15%;
+	padding: 3% 15% 0 16%;
 	color: rgb(249, 235, 200);
-	font-family: 'Montserrat', Arial, sans-serif;
+	font-family: 'Montserrat-bold', Arial, sans-serif;
 }
+
+h2 {
+	padding: 0;
+	margin: 0;
+
+}
+
+h4 {
+	padding: 0.5rem 0 0 0;
+	margin: 0 1rem 0 0 ;
+}
+
 
 li {
 	padding: 3rem;
 }
 
 .list {
-	padding: 3% 13%;
+	padding: 2% 13%;
 }
 
 .item {
+	border: 2px solid rgb(218, 229, 208);
+	margin: 0 0 3% 0;
+}
+
+.movie {
+	display: inline-flex;
+}
+
+.movie img {
+	width: 10rem;
+	margin-right: 3rem;
+}
+
+.movie_header {
+	display: flex;
+	justify-content: space-between;
 }
